@@ -1,0 +1,7 @@
+services:
+  mq:
+    image: rabbitmq
+    ports:
+      - "5672:5672"
+    env_file:
+      - .env
