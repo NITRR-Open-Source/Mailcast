@@ -4,13 +4,19 @@ import (
 	"bytes"
 	"email_app/helpers"
 	"log"
+	"os"
 	"time"
 
+	"github.com/joho/godotenv"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 func main() {
-	conn, err := amqp.Dial("amqp://user:password@localhost:5672/")
+	err := godotenv.Load()
+	helpers.FailOnError(err, "Error loading .env file")
+
+	qUrl := os.Getenv("RABBITMQ_URL")
+	conn, err := amqp.Dial(qUrl)
 	helpers.FailOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
 
@@ -18,24 +24,14 @@ func main() {
 	helpers.FailOnError(err, "Failed to open a channel")
 	defer ch.Close()
 
-	q, err := ch.QueueDeclare(
-		"hello", // name
-		false,   // durable
-		false,   // delete when unused
-		false,   // exclusive
-		false,   // no-wait
-		nil,     // arguments
-	)
-	helpers.FailOnError(err, "Failed to declare a queue")
-
 	msgs, err := ch.Consume(
-		q.Name,  // queue
-		"email", // consumer
-		false,   // auto-ack
-		false,   // exclusive
-		false,   // no-local
-		false,   // no-wait
-		nil,     // args
+		"broadcast_emails", // queue
+		"email",            // consumer
+		false,              // auto-ack
+		false,              // exclusive
+		false,              // no-local
+		false,              // no-wait
+		nil,                // args
 	)
 	helpers.FailOnError(err, "Failed to register a consumer")
 
@@ -53,5 +49,5 @@ func main() {
 		log.Printf("Done")
 	}
 
-	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
+	log.Printf("[*] Waiting for messages. To exit press CTRL+C")
 }
