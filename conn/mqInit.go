@@ -14,7 +14,7 @@ func MqInit(qConn *amqp.Connection, qName string) (queue amqp.Queue, channel *am
 
 	q, err := ch.QueueDeclare(
 		qName, // name
-		false, // durable
+		true,  // durable
 		false, // delete when unused
 		false, // exclusive
 		false, // no-wait
