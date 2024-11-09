@@ -2,8 +2,8 @@ package main
 
 import (
 	"bytes"
-	"email_app/helpers"
 	"log"
+	"mailcast/helpers"
 	"os"
 	"time"
 

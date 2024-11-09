@@ -1,16 +1,14 @@
-package mq
+package conn
 
 import (
-	"log"
+	"mailcast/helpers"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-func MqInit(qConn *amqp.Connection, qName string) (queue amqp.Queue, channel *amqp.Channel, err error) {
+func MqInit(qConn *amqp.Connection, qName string) (amqp.Queue, *amqp.Channel) {
 	ch, err := qConn.Channel()
-	if err != nil {
-		log.Panicf("Failed to open a channel: %s", err)
-	}
+	helpers.FailOnError(err, "Failed to open a channel")
 
 	q, err := ch.QueueDeclare(
 		qName, // name
@@ -20,9 +18,7 @@ func MqInit(qConn *amqp.Connection, qName string) (queue amqp.Queue, channel *am
 		false, // no-wait
 		nil,   // arguments
 	)
-	if err != nil {
-		return amqp.Queue{}, nil, err
-	}
+	helpers.FailOnError(err, "Failed to initialize the message queue")
 
-	return q, ch, nil
+	return q, ch
 }
